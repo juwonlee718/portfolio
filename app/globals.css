@@ -121,7 +121,6 @@ button, input, textarea { font: inherit; }
 .text-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; white-space: nowrap; }
 
 .pokemon-card-stage { position: relative; width: min(100%, 400px); justify-self: center; }
-.pokemon-card-hint { margin: 18px 0 0; color: var(--orange-text); text-align: center; font-size: .68rem; font-weight: 900; letter-spacing: .16em; }
 
 .about-strip { background: var(--ink); color: white; }
 .about-strip-inner { padding-block: 72px; }

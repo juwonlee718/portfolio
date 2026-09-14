@@ -541,6 +541,33 @@ Shine & Glare Effects
 }
 
 .vmax-profile-card .card__rotator:focus-visible { outline: 3px solid #ff5a16; outline-offset: 8px; }
+.vmax-profile-card .card__rotator { cursor: crosshair; }
+
+.vmax-profile-card .card__front::before {
+  content: "";
+  z-index: 4;
+  grid-area: 1 / 1;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 42%, rgba(255,255,255,.42) 48%, transparent 54%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translateX(-115%);
+  animation: vmax-idle-glint 5.5s ease-in-out infinite;
+}
+
+.vmax-profile-card .card__rotator:hover .card__front::before,
+.vmax-profile-card .card__rotator:focus-visible .card__front::before { animation: none; opacity: 0; }
+
+@keyframes vmax-idle-glint {
+  0%, 68%, 100% { opacity: 0; transform: translateX(-115%); }
+  76% { opacity: .75; }
+  87% { opacity: .75; transform: translateX(115%); }
+  92% { opacity: 0; transform: translateX(115%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vmax-profile-card .card__front::before { animation: none; }
+}
 
 
 

@@ -90,7 +90,6 @@ export function PokemonProfileCard() {
           </div>
         </div>
       </div>
-      <p className="pokemon-card-hint">MOVE TO SEE THE VMAX FOIL ↗</p>
     </div>
   );
 }
