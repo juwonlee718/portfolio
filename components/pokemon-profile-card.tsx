@@ -1,73 +1,96 @@
 "use client";
 
-import Image from "next/image";
 import { type CSSProperties, type PointerEvent, useRef } from "react";
 
-const restingCardStyle = {
-  "--card-rotate-x": "0deg",
-  "--card-rotate-y": "0deg",
+type CardVariable = `--${string}`;
+
+const restStyle = {
   "--pointer-x": "50%",
   "--pointer-y": "50%",
-  "--glare-opacity": "0",
+  "--pointer-from-center": "0",
+  "--pointer-from-top": "0.5",
+  "--pointer-from-left": "0.5",
+  "--card-opacity": "0",
+  "--rotate-x": "0deg",
+  "--rotate-y": "0deg",
+  "--background-x": "50%",
+  "--background-y": "50%",
+  "--card-scale": "1",
+  "--translate-x": "0px",
+  "--translate-y": "0px",
 } as CSSProperties;
 
 /**
- * The interaction model is inspired by simeydotme/pokemon-cards-css:
- * https://github.com/simeydotme/pokemon-cards-css
+ * Adapted from simeydotme/pokemon-cards-css (GPL-3.0-or-later).
+ * The original VMAX stylesheet and vmaxbg.jpg texture are bundled locally.
  */
 export function PokemonProfileCard() {
-  const cardRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  function updateCard(event: PointerEvent<HTMLElement>) {
+  function setVariable(name: CardVariable, value: string) {
+    cardRef.current?.style.setProperty(name, value);
+  }
+
+  function updateCard(event: PointerEvent<HTMLDivElement>) {
     if (event.pointerType === "touch" || !cardRef.current) return;
 
-    const bounds = cardRef.current.getBoundingClientRect();
-    const pointerX = Math.min(100, Math.max(0, ((event.clientX - bounds.left) / bounds.width) * 100));
-    const pointerY = Math.min(100, Math.max(0, ((event.clientY - bounds.top) / bounds.height) * 100));
-    const rotateY = (pointerX - 50) / 6;
-    const rotateX = (50 - pointerY) / 7;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((event.clientX - bounds.left) / bounds.width) * 100));
+    const y = Math.min(100, Math.max(0, ((event.clientY - bounds.top) / bounds.height) * 100));
+    const centerX = x - 50;
+    const centerY = y - 50;
+    const distance = Math.min(1, Math.hypot(centerX, centerY) / 50);
 
-    cardRef.current.style.setProperty("--pointer-x", `${pointerX}%`);
-    cardRef.current.style.setProperty("--pointer-y", `${pointerY}%`);
-    cardRef.current.style.setProperty("--card-rotate-x", `${rotateX}deg`);
-    cardRef.current.style.setProperty("--card-rotate-y", `${rotateY}deg`);
-    cardRef.current.style.setProperty("--glare-opacity", "1");
+    setVariable("--pointer-x", `${x}%`);
+    setVariable("--pointer-y", `${y}%`);
+    setVariable("--pointer-from-center", String(distance));
+    setVariable("--pointer-from-top", String(y / 100));
+    setVariable("--pointer-from-left", String(x / 100));
+    setVariable("--card-opacity", "1");
+    setVariable("--rotate-x", `${-(centerX / 3.5)}deg`);
+    setVariable("--rotate-y", `${centerY / 3.5}deg`);
+    setVariable("--background-x", `${37 + x * 0.26}%`);
+    setVariable("--background-y", `${33 + y * 0.34}%`);
   }
 
   function resetCard() {
-    if (!cardRef.current) return;
-    Object.entries(restingCardStyle).forEach(([property, value]) => {
-      cardRef.current?.style.setProperty(property, String(value));
-    });
+    Object.entries(restStyle).forEach(([name, value]) => setVariable(name as CardVariable, String(value)));
   }
 
   return (
-    <div className="pokemon-photo-stage">
-      <article
-        aria-label="이주원의 프로필 사진. 마우스를 올리면 프리즘 반짝임 효과가 움직입니다."
-        className="pokemon-profile-photo"
-        onPointerMove={updateCard}
-        onPointerLeave={resetCard}
-        onBlur={resetCard}
+    <div className="pokemon-card-stage">
+      <div
+        className="card interactive vmax-profile-card"
+        data-rarity="rare holo vmax"
+        data-supertype="pokémon"
         ref={cardRef}
-        style={restingCardStyle}
-        tabIndex={0}
+        style={restStyle}
       >
-        <div className="pokemon-photo-frame">
-          <Image
-            alt="이주원의 프로필 사진"
-            fill
-            priority
-            sizes="(max-width: 860px) min(100vw - 48px, 400px), 400px"
-            src="/images/juwon-pokemon-card.png"
-            style={{ objectFit: "cover", objectPosition: "50% 53%" }}
-          />
-          <div className="pokemon-photo-glitter" aria-hidden="true" />
-          <span className="photo-corner photo-corner-top" aria-hidden="true" />
-          <span className="photo-corner photo-corner-bottom" aria-hidden="true" />
+        <div className="card__translater">
+          <div
+            aria-label="이주원의 VMAX 홀로그램 프로필 사진. 마우스를 움직이면 원본 VMAX 포일 효과가 반응합니다."
+            className="card__rotator"
+            onBlur={resetCard}
+            onPointerLeave={resetCard}
+            onPointerMove={updateCard}
+            role="img"
+            tabIndex={0}
+          >
+            <div className="card__front">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Original card CSS targets an image element. */}
+              <img
+                alt="이주원의 프로필 사진"
+                className="profile-photo"
+                fetchPriority="high"
+                src="/images/juwon-pokemon-card.png"
+              />
+              <div className="card__shine" aria-hidden="true" />
+              <div className="card__glare" aria-hidden="true" />
+            </div>
+          </div>
         </div>
-      </article>
-      <p className="pokemon-photo-hint">MOVE TO FIND THE GLITTER ↗</p>
+      </div>
+      <p className="pokemon-card-hint">MOVE TO SEE THE VMAX FOIL ↗</p>
     </div>
   );
 }
